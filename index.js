@@ -1,17 +1,12 @@
 import './db.js';
 
-import { ApolloServer } from 'apollo-server-express';
-import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
-import express from 'express';
-import http from 'http';
+import { ApolloServer } from 'apollo-server';
 
 import { editPitch, findAvailablePitches, getClubPitches, typeDefPitches, addPitch, pitchCount } from "./models/pitch.js"
 import { allUsers, findUser, createUser, editUser, deleteUser, countUsers, typeDefAuthor } from "./models/user.js"
 import { allClubs, getClub, createClub, typeDefClubs } from "./models/clubs.js"
 import { allReservations, getReservationPerClub, getReservationPerPlayer, createReservation, editReservation, deleteReservation ,typeDefReservation } from "./models/reservations.js"
 import { typeDefChats, getRoom, getRooms, getRoomsUser ,addUserToRoom, createRoom, deleteRoom, sendMessage } from "./models/chat.js"
-
-const typeDefs = [ typeDefClubs, typeDefAuthor, typeDefReservation, typeDefPitches, typeDefChats];
 
 const resolvers = {
   Query: {
@@ -45,22 +40,15 @@ const resolvers = {
     deleteUser,
     editUser,
   }
-}
+} 
 
-async function startApolloServer(typeDefs, resolvers) {
-  const app = express();
-  const httpServer = http.createServer(app);
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    csrfPrevention: true,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-  });
+const server = new ApolloServer({
+  typeDefs: [ typeDefClubs, typeDefAuthor, typeDefReservation, typeDefPitches, typeDefChats],
+  resolvers,
+});
 
-  await server.start();
-  server.applyMiddleware({ app });
-  await new Promise(resolve => httpServer.listen({ port: 4000 }, resolve));
-  console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
-}
-
-startApolloServer(typeDefs, resolvers)
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
+}).catch(err => {
+  console.log(err);
+});
