@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const connectionString = "mongodb+srv://Adriwebs:zG90o6JbuDF1h9US@cluster0.zso5e.mongodb.net/padelhost?retryWrites=true&w=majority";
+const connectionString = process.env.MONGODB_URI;
 
 mongoose.connect(connectionString, {
   useNewUrlParser: true,
