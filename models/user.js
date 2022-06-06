@@ -51,8 +51,8 @@ export const userSchema = new mongoose.Schema ({
     default: "No category"
   },
   rank: {
-    type: String,
-    default: "No rank"
+    type: Number,
+    default: 0,
   },
 });
 
@@ -91,13 +91,13 @@ export const typeDefAuthor = gql`
   }
 `
 
-export const createUser = (root, args) => {
+export const createUser = async (root, args) => {
   const newUser = new User({...args})
-  return newUser.save()
+  return await newUser.save()
 }
 
-export const deleteUser = (root, args) => {
-  const user = User.findByIdAndDelete({_id: args.id})
+export const deleteUser = async (root, args) => {
+  const user = await User.findByIdAndDelete({_id: args.id})
   return user.save()
 }
 
@@ -115,6 +115,6 @@ export const allUsers = async () => {
   return await User.find({})
 }
 
-export const findUser = (root, args) => {
-  return User.findOne({_id: args.id})
+export const findUser = async (root, args) => {
+  return await User.findOne({id: args.id})
 }
