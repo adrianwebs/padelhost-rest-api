@@ -47,12 +47,7 @@ const server = new ApolloServer({
   typeDefs: [ typeDefClubs, typeDefAuthor, typeDefReservation, typeDefPitches, typeDefChats],
   resolvers,
   plugins: [
-    process.env.NODE_ENV === 'production'
-      ? ApolloServerPluginLandingPageProductionDefault({
-          graphRef: "Padelhost-api-14x08@current",
-          footer: false,
-        })
-      : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+    ApolloServerPluginLandingPageLocalDefault({embed: true})
   ],
 });
 
