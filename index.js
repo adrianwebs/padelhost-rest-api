@@ -46,9 +46,7 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs: [ typeDefClubs, typeDefAuthor, typeDefReservation, typeDefPitches, typeDefChats],
   resolvers,
-  plugins: [
-    ApolloServerPluginLandingPageLocalDefault({embed: true})
-  ],
+  playground: true,
 });
 
 server.listen(process.env.PORT || 5000).then(({ url }) => {
