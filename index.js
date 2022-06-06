@@ -1,7 +1,7 @@
 import './db.js';
 
 import { ApolloServer } from 'apollo-server';
-import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
+import { ApolloServerPluginLandingPageProductionDefault, ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 
 import { editPitch, findAvailablePitches, getClubPitches, typeDefPitches, addPitch, pitchCount } from "./models/pitch.js"
 import { allUsers, findUser, createUser, editUser, deleteUser, countUsers, typeDefAuthor } from "./models/user.js"
@@ -47,7 +47,12 @@ const server = new ApolloServer({
   typeDefs: [ typeDefClubs, typeDefAuthor, typeDefReservation, typeDefPitches, typeDefChats],
   resolvers,
   plugins: [
-    ApolloServerPluginLandingPageGraphQLPlayground(),
+    process.env.NODE_ENV === 'production'
+      ? ApolloServerPluginLandingPageProductionDefault({
+          graphRef: "Padelhost-api-14x08@current",
+          footer: false,
+        })
+      : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
   ],
 });
 
