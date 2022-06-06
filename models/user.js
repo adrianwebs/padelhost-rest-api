@@ -15,15 +15,18 @@ export const userSchema = new mongoose.Schema ({
   description: {
     type: String,
     minlength: 15,
-    maxlength: 155
+    maxlength: 155,
+    default: "Hello there! I am new using Padelhost",
   },
   phone: {
     type: String,
-    minlength: 9,
+    maxlength: 9,
+    default: "No phone",
   },
   location: {
     type: String,
     minlength: 5,
+    default: "No location"
   },
   email: {
     type: String,
@@ -32,20 +35,24 @@ export const userSchema = new mongoose.Schema ({
   },
   password: {
     type: String,
-    required: true,
-    minlength: 7,
+    minlength: 5,
+    default: "No password"
   },
   avatar: {
     type: String,
+    default: "https://avatars.dicebear.com/api/male/john.svg"
   },
   type: {
     type: String,
+    default: "Player",
   },
   category: {
     type: String,
+    default: "No category"
   },
   rank: {
     type: String,
+    default: "No rank"
   },
 });
 
@@ -56,11 +63,11 @@ export const typeDefAuthor = gql`
     id: ID!
     name: String!
     description: String
-    phone: String!
-    location: String!
+    phone: String
+    location: String
     email: String!
-    password: String!
-    avatar: String!
+    password: String
+    avatar: String
     type: Type!
     category: String
     rank: Int
@@ -78,7 +85,7 @@ export const typeDefAuthor = gql`
   }
 
   type Mutation {
-    createUser(name: String!, description: String, phone: String!, location: String!, email: String!, password: String!, avatar: String!, type: Type!, category: String, rank: Int): User
+    createUser(id: ID!, name: String!, description: String, phone: String, location: String, email: String!, password: String, avatar: String, type: Type, category: String, rank: Int): User
     deleteUser(id: ID!): User
     editUser(id: ID!, name: String, description: String, phone: String, location: String, email: String, password: String, avatar: String, type: Type, category: String, rank: Int): User
   }

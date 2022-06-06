@@ -34,11 +34,11 @@ export const typeDefClubs = gql`
     id: ID!
     name: String!
     description: String
-    phone: String!
-    location: String!
+    phone: String
+    location: String
     email: String!
-    password: String!
-    avatar: String!
+    password: String
+    avatar: String
     type: String!
     category: String
     rank: Int
