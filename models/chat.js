@@ -4,6 +4,10 @@ import { userSchema } from "./user.js";
 
 
 const messageSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: true,
+  },
   text: {
     type: String,
     minlength: 1,
@@ -12,8 +16,8 @@ const messageSchema = new mongoose.Schema({
     type: userSchema,
   },
   createdAt: {
-    type: Date,
-    default: Date(),
+    type: String,
+    default: Date.now().toString(),
   },
 });
 
@@ -54,6 +58,19 @@ export const typeDefChats = gql`
     createdAt: String!
   }
 
+  input UserMessage {
+    id: ID
+    name: String
+    email: String
+    avatar: String
+  }
+
+  input MessageInput {
+    id: ID!
+    text: String!
+    user: UserMessage
+  }
+
   type Query {
     getRoom(id: ID!): Room
     getRooms: [Room!]
@@ -64,12 +81,12 @@ export const typeDefChats = gql`
     createRoom(name: String!, type: String, users: [UserInput!]): Room
     deleteRoom(id: ID!): Room
     addUserToRoom(id: ID!, user: UserInput!): Room
-    sendMessage(id: ID!, text: String!): Message
+    sendMessage(id: ID!, message: MessageInput!): Room
   }
 `
 
 export const getRoom = async (root, args) => {
-  return await Room.findOne({_id: args.id})
+  return await Room.findOne({id: args.id})
 }
 
 export const getRooms = async (root, args) => {
@@ -82,7 +99,7 @@ export const createRoom = (root, args) => {
 }
 
 export const deleteRoom = async (root, args) => {
-  const room = await Room.findByIdAndDelete({_id: args.id})
+  const room = await Room.findByIdAndDelete({id: args.id})
   return room.save()
 }
 
