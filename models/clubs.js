@@ -59,7 +59,7 @@ export const allClubs = async () => {
 }
 
 export const getClub = async (root, args) => {
-  return await Club.findById(args.id)
+  return await Club.findOne({ id: args.id})
 }
 
 export const createClub = (root, args) => {

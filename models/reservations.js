@@ -120,6 +120,6 @@ export const editReservation = (root, args) => {
 }
 
 export const deleteReservation = (root, args) => {
-  const reservation = Reservation.findByIdAndDelete({id: args.id})
+  const reservation = Reservation.findOneAndDelete({id: args.id}, { returnDocument: 'after' })
   return reservation.save()
 }

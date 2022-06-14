@@ -100,17 +100,16 @@ export const createRoom = (root, args) => {
 }
 
 export const deleteRoom = async (root, args) => {
-  const room = await Room.findByIdAndDelete({id: args.id})
+  const room = await Room.findOneAndDelete({id: args.id}, {returnDocument: 'after'})
   return room.save()
 }
 
 export const addUserToRoom = async (root, args) => {
-  return await Room.findOneAndUpdate({id: args.id}, {$push: {users: args.user}})
+  return await Room.findOneAndUpdate({id: args.id}, {$push: {users: args.user}}, {returnDocument: 'after'})
 }
 
 export const sendMessage = async (root, args) => {
-  const room = await Room.findOneAndUpdate({id: args.id}, {$push: {messages: args.message}})
-  return room.save()
+  return await Room.findOneAndUpdate({id: args.id}, {$push: {messages: args.message}}, {returnDocument: 'after'})
 }
 
 export const getRoomsUser = async (root, args) => {
