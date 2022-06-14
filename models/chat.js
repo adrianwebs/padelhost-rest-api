@@ -69,6 +69,7 @@ export const typeDefChats = gql`
     id: ID!
     text: String!
     user: UserMessage
+    createdAt: String
   }
 
   type Query {
