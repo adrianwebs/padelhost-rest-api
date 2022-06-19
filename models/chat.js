@@ -1,7 +1,10 @@
 import { gql } from "apollo-server";
+import { PubSub } from "graphql-subscriptions";
 import mongoose from "mongoose";
+import { SUBSCRIPTION_EVENTS } from "../index.js";
 import { userSchema } from "./user.js";
 
+const pubsub = new PubSub()
 
 const messageSchema = new mongoose.Schema({
   id: {
@@ -37,6 +40,10 @@ const roomSchema = new mongoose.Schema({
     enum: ['match', 'chat'],
     default: 'chat',
   },
+  id: {
+    type: String,
+    required: true,
+  }
 });
 
 const Room = mongoose.model("Room", roomSchema);
@@ -79,10 +86,14 @@ export const typeDefChats = gql`
   }
 
   type Mutation {
-    createRoom(name: String!, type: String, users: [UserInput!]): Room
+    createRoom(id: ID!, name: String!, type: String, users: [UserInput!]): Room
     deleteRoom(id: ID!): Room
     addUserToRoom(id: ID!, user: UserInput!): Room
     sendMessage(id: ID!, message: MessageInput!): Room
+  }
+
+  type Subscription {
+    messageAdded: [Room]
   }
 `
 
@@ -109,9 +120,15 @@ export const addUserToRoom = async (root, args) => {
 }
 
 export const sendMessage = async (root, args) => {
-  return await Room.findOneAndUpdate({id: args.id}, {$push: {messages: args.message}}, {returnDocument: 'after'})
+  const room = await Room.findOneAndUpdate({id: args.id}, {$push: {messages: args.message}}, {returnDocument: 'after'})
+  pubsub.publish(SUBSCRIPTION_EVENTS.MESSAGE_ADDED, {messageAdded: await Room.find({users: {$elemMatch: {id: args.message.user.id}}})})
+  return room
 }
 
 export const getRoomsUser = async (root, args) => {
   return await Room.find({users: {$elemMatch: {id: args.id}}})
 }
+
+export const messageAdded = () => {
+  return pubsub.asyncIterator(SUBSCRIPTION_EVENTS.MESSAGE_ADDED)
+} 

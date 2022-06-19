@@ -1,13 +1,21 @@
 import './db.js';
 
-import { ApolloServer } from 'apollo-server';
-import { ApolloServerPluginLandingPageProductionDefault, ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
-
+import { ApolloServer } from 'apollo-server-express';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import express from 'express';
 import { editPitch, findAvailablePitches, getClubPitches, typeDefPitches, addPitch, pitchCount } from "./models/pitch.js"
 import { allUsers, findUser, createUser, editUser, deleteUser, countUsers, typeDefAuthor } from "./models/user.js"
 import { allClubs, getClub, createClub, typeDefClubs } from "./models/clubs.js"
 import { allReservations, getReservationPerClub, getReservationPerPlayer, createReservation, editReservation, deleteReservation ,typeDefReservation } from "./models/reservations.js"
-import { typeDefChats, getRoom, getRooms, getRoomsUser ,addUserToRoom, createRoom, deleteRoom, sendMessage } from "./models/chat.js"
+import { typeDefChats, getRoom, getRooms, getRoomsUser ,addUserToRoom, createRoom, deleteRoom, sendMessage, messageAdded } from "./models/chat.js"
+import { WebSocketServer } from 'ws';
+import { createServer } from 'http';
+import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
+import { useServer } from 'graphql-ws/lib/use/ws'
+
+export const SUBSCRIPTION_EVENTS = {
+  MESSAGE_ADDED: 'messageAdded',
+}
 
 const resolvers = {
   Query: {
@@ -40,17 +48,52 @@ const resolvers = {
     createUser,
     deleteUser,
     editUser,
+  },
+  Subscription: {
+    messageAdded: {
+      subscribe: () => messageAdded(),
+    }
   }
 } 
 
-const server = new ApolloServer({
+const schema = makeExecutableSchema({
   typeDefs: [ typeDefClubs, typeDefAuthor, typeDefReservation, typeDefPitches, typeDefChats],
   resolvers,
+})
+
+const app = new express()
+const httpServer = new createServer(app)
+
+const wsServer = new WebSocketServer({
+  server: httpServer,
+  path: '/graphql'
+})
+
+const serverCleanup = useServer({ schema }, wsServer)
+
+const server = new ApolloServer({
+  schema,
   playground: true,
+  csrfPrevention: true,
+  cache: 'bounded',
+  plugins: [
+    ApolloServerPluginDrainHttpServer({ httpServer }),
+
+    {
+      async serverwillStart() {
+        return {
+          async drainServer() {
+            await serverCleanup.dispose()
+          },
+        }
+      },
+    }
+  ]
 });
 
-server.listen(process.env.PORT || 5000).then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-}).catch(err => {
-  console.log(err);
-});
+await server.start()
+server.applyMiddleware({ app })
+
+httpServer.listen(process.env.PORT || 5000, () => {
+  console.log(`Server is running on port ${process.env.PORT || 5000}`)
+})
